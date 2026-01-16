@@ -1,35 +1,25 @@
-name: PHP Composer
+name: PHP CI
 
 on:
   push:
-    branches: [ "v1.0" ]
   pull_request:
-    branches: [ "v1.0" ]
-
-permissions:
-  contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-
-        restore-keys: |
-          ${{ runner.os }}-php-
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
 
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
 
-    # - name: Run test suite
-    #   run: composer run-script test
+      - name: Validate composer.json (skip composer.lock check)
+        run: composer validate --no-check-lock
